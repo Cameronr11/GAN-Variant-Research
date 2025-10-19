@@ -1,0 +1,37 @@
+# configs/baseline.yaml
+data:
+  root: data           # your extracted Kaggle data lives here
+  domain_a: photo_jpg  # A: photos (input domain)
+  domain_b: monet_jpg  # B: Monet (target style)
+  img_size: 256
+  load_size: 286       # resize to 286, random-crop to 256 (CycleGAN baseline)
+  num_workers: 0       # Windows-friendly
+
+training:
+  epochs: 200
+  batch_size: 1
+  amp: true            # mixed precision for speed on 40-series
+  seed: 0
+  save_dir: checkpoints
+  log_dir: runs/baseline
+  save_every: 10
+
+optim:
+  lr_g: 0.0002
+  lr_d: 0.0002
+  betas: [0.5, 0.999]
+  lr_decay_after: 100  # linear decay from epoch 100 → 200
+
+loss:
+  gan: lsgan           # lsgan is a common baseline choice; 'bce' also used
+  lambda_cycle: 10.0
+  lambda_identity: 0.5
+
+model:
+  ngf: 64
+  ndf: 64
+  n_blocks: 9          # ResNet-9 generator
+  spectral_norm_d: false
+
+runtime:
+  device: cuda
