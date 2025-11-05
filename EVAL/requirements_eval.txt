@@ -1,0 +1,29 @@
+# Kaggle MiFID Evaluator Dependencies
+# Python 3.10+
+# For use with GAN310 venv or similar
+
+# Core deep learning
+torch>=2.2.0
+torchvision>=0.17.0
+
+# Metrics (includes MiFID, FID, and torch-fidelity backend)
+torchmetrics[image]>=1.4.0
+
+# Scientific computing
+scipy>=1.11.0
+numpy>=1.24.0,<2.0.0
+
+# Image handling
+Pillow>=10.0.0
+
+# Progress bars
+tqdm>=4.66.0
+
+# CLI and config
+click>=8.1.0
+PyYAML>=6.0.0
+
+# Optional: TFDS support (uncomment if needed)
+# tensorflow-datasets>=4.9.0
+# tensorflow>=2.13.0
+

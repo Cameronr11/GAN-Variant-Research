@@ -1,0 +1,34 @@
+# Local Monet MiFID Evaluation Configuration
+# Uses Kaggle Monet JPG folder as real reference set
+
+name: "local_monet_mifid"
+
+real:
+  mode: "folder"
+  path: "/lustre/isaac24/scratch/crader6/GAN_Project/data/monet_jpg"
+  recursive: true
+
+fake:
+  # TODO: set this to your generated images folder once you create it
+  path: "/lustre/isaac24/scratch/crader6/GAN_Project/outputs/variant1_final"
+  recursive: true
+
+io:
+  batch_size: 64
+  num_workers: 8
+  pin_memory: true
+
+metric:
+  img_size: 299
+  normalize_uint8: false
+  feature_dim: 2048
+  cosine_eps: 0.1
+
+cache:
+  dir: "./cache"
+
+report:
+  out_json: "./cache/reports/local_monet_mifid.json"
+  write_per_class: false
+
+

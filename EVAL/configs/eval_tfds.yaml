@@ -1,0 +1,34 @@
+# TFDS Monet MiFID Evaluation Configuration
+# Uses TensorFlow Datasets (TFDS) Monet2Photo as real reference set
+# Requires: pip install tensorflow-datasets tensorflow
+
+name: "tfds_monet_mifid"
+
+real:
+  mode: "tfds"
+  tfds_name: "cycle_gan/monet2photo"   # Monet2Photo dataset family
+  split: "trainA"                      # Monet images split
+  subset: "all"
+
+fake:
+  path: "C:/Users/Cameron/OneDrive/Desktop/GAN_Project/outputs/my_variant_run"  # Edit this path
+  recursive: true
+
+io:
+  batch_size: 64
+  num_workers: 8
+  pin_memory: true
+
+metric:
+  img_size: 299
+  normalize_uint8: false
+  feature_dim: 2048
+  cosine_eps: 0.1
+
+cache:
+  dir: "./cache"
+
+report:
+  out_json: "./cache/reports/tfds_monet_mifid.json"
+  write_per_class: false
+

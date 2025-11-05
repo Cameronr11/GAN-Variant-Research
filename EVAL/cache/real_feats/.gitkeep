@@ -1,0 +1,3 @@
+# Cache directory for real image features
+# *.npz files will be stored here
+

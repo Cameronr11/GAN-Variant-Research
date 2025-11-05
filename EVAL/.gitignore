@@ -1,0 +1,36 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# Cache files (DO commit sample files in cache/reports/)
+cache/real_feats/*.npz
+cache/logs/*.txt
+!cache/logs/.gitkeep
+!cache/logs/20251023_221500_sample_evaluation.txt
+
+# Reports (keep samples)
+!cache/reports/sample_report.json
+!cache/reports/sample_report_worst_cases.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+

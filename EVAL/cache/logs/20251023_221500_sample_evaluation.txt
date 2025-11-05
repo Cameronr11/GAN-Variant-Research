@@ -1,0 +1,60 @@
+======================================================================
+KAGGLE MiFID EVALUATION REPORT
+======================================================================
+Run Name:     sample_evaluation
+Timestamp:    2025-10-23T22:15:00Z
+
+DATASETS
+----------------------------------------------------------------------
+Real mode:    folder
+Real path:    /path/to/monet_jpg
+Fake path:    /path/to/generated_images
+Real images:  300
+Fake images:  9,000
+
+PRIMARY METRICS
+----------------------------------------------------------------------
+MiFID:        41.2370  ← KAGGLE LEADERBOARD METRIC
+FID:          45.1100
+
+MEMORIZATION ANALYSIS (Min Cosine Distance)
+----------------------------------------------------------------------
+Median:       0.4120
+Mean:         0.4087
+Std:          0.0823
+P10:          0.3050
+P90:          0.5210
+
+Lower cosine distances = higher memorization risk
+MiFID penalizes low distances (i.e., high similarity to real set)
+
+WORST MEMORIZATION CASES (Top-5 shown)
+----------------------------------------------------------------------
+1. Distance: 0.1234
+   Fake:  fake_001.jpg
+   Real:  monet_042.jpg
+2. Distance: 0.1456
+   Fake:  fake_087.jpg
+   Real:  monet_125.jpg
+3. Distance: 0.1589
+   Fake:  fake_203.jpg
+   Real:  monet_089.jpg
+4. Distance: 0.1623
+   Fake:  fake_314.jpg
+   Real:  monet_256.jpg
+5. Distance: 0.1701
+   Fake:  fake_421.jpg
+   Real:  monet_178.jpg
+
+CONFIGURATION
+----------------------------------------------------------------------
+Image size:   299x299
+Batch size:   64
+Workers:      8
+
+NOTES
+----------------------------------------------------------------------
+TorchMetrics MiFID/FID with InceptionV3 pool3 (2048 dims). uint8 input [0,255] resized to 299x299. MiFID = FID / M where M is memorization penalty from avg min cosine distance.
+
+======================================================================
+

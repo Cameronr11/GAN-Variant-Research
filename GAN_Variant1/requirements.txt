@@ -1,0 +1,27 @@
+# CUT++ Ultra-Lean Training System Requirements
+# Install with: pip install -r requirements.txt
+
+# Core ML frameworks
+torch>=2.0.0
+torchvision>=0.15.0
+
+# CLIP for k-NN repulsion
+git+https://github.com/openai/CLIP.git
+
+# FAISS for efficient nearest neighbor search
+faiss-gpu>=1.7.2  # Use faiss-cpu if no GPU
+
+# Image processing
+Pillow>=9.0.0
+
+# Scientific computing
+numpy>=1.23.0
+scipy>=1.9.0
+
+# Config and utilities
+pyyaml>=6.0
+tqdm>=4.64.0
+
+# Optional: for TFRecord support
+# tensorflow>=2.10.0  # Uncomment if using TFRecord datasets
+

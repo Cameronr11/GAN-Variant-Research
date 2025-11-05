@@ -1,0 +1,159 @@
+{
+  "run": {
+    "name": "sample_evaluation",
+    "timestamp_utc": "2025-10-23T22:15:00Z",
+    "fake_dir": "/path/to/generated_images",
+    "real_mode": "folder",
+    "real_dir_or_tfds": "/path/to/monet_jpg",
+    "num_fake": 9000,
+    "num_real": 300,
+    "img_size": 299,
+    "batch_size": 64,
+    "num_workers": 8,
+    "warnings": []
+  },
+  "scores": {
+    "mifid": 41.2370,
+    "fid": 45.1100,
+    "cosine_min_distance": {
+      "median": 0.4120,
+      "mean": 0.4087,
+      "std": 0.0823,
+      "p10": 0.3050,
+      "p90": 0.5210,
+      "hist_bins": [
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7
+      ],
+      "hist_counts": [
+        38,
+        211,
+        756,
+        1432,
+        2089,
+        1876,
+        1234,
+        687,
+        423,
+        254
+      ]
+    }
+  },
+  "hashes": {
+    "fake_list_sha1": "abc123def456789012345678901234567890abcd",
+    "real_list_sha1": "fedcba098765432109876543210987654321fedc",
+    "real_cache_key": "monet_jpg@sha1:fedcba0987654321"
+  },
+  "memorization_analysis": {
+    "worst_cases": [
+      {
+        "fake_path": "/path/to/generated_images/fake_001.jpg",
+        "distance": 0.1234,
+        "cosine_similarity": 0.8766,
+        "nearest_real_path": "/path/to/monet_jpg/monet_042.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_087.jpg",
+        "distance": 0.1456,
+        "cosine_similarity": 0.8544,
+        "nearest_real_path": "/path/to/monet_jpg/monet_125.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_203.jpg",
+        "distance": 0.1589,
+        "cosine_similarity": 0.8411,
+        "nearest_real_path": "/path/to/monet_jpg/monet_089.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_314.jpg",
+        "distance": 0.1623,
+        "cosine_similarity": 0.8377,
+        "nearest_real_path": "/path/to/monet_jpg/monet_256.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_421.jpg",
+        "distance": 0.1701,
+        "cosine_similarity": 0.8299,
+        "nearest_real_path": "/path/to/monet_jpg/monet_178.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_512.jpg",
+        "distance": 0.1789,
+        "cosine_similarity": 0.8211,
+        "nearest_real_path": "/path/to/monet_jpg/monet_034.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_637.jpg",
+        "distance": 0.1845,
+        "cosine_similarity": 0.8155,
+        "nearest_real_path": "/path/to/monet_jpg/monet_201.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_729.jpg",
+        "distance": 0.1923,
+        "cosine_similarity": 0.8077,
+        "nearest_real_path": "/path/to/monet_jpg/monet_067.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_841.jpg",
+        "distance": 0.1987,
+        "cosine_similarity": 0.8013,
+        "nearest_real_path": "/path/to/monet_jpg/monet_143.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_956.jpg",
+        "distance": 0.2034,
+        "cosine_similarity": 0.7966,
+        "nearest_real_path": "/path/to/monet_jpg/monet_289.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_1028.jpg",
+        "distance": 0.2091,
+        "cosine_similarity": 0.7909,
+        "nearest_real_path": "/path/to/monet_jpg/monet_112.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_1134.jpg",
+        "distance": 0.2156,
+        "cosine_similarity": 0.7844,
+        "nearest_real_path": "/path/to/monet_jpg/monet_245.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_1247.jpg",
+        "distance": 0.2198,
+        "cosine_similarity": 0.7802,
+        "nearest_real_path": "/path/to/monet_jpg/monet_078.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_1359.jpg",
+        "distance": 0.2245,
+        "cosine_similarity": 0.7755,
+        "nearest_real_path": "/path/to/monet_jpg/monet_198.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_1467.jpg",
+        "distance": 0.2289,
+        "cosine_similarity": 0.7711,
+        "nearest_real_path": "/path/to/monet_jpg/monet_156.jpg"
+      },
+      {
+        "fake_path": "/path/to/generated_images/fake_1573.jpg",
+        "distance": 0.2334,
+        "cosine_similarity": 0.7666,
+        "nearest_real_path": "/path/to/monet_jpg/monet_223.jpg"
+      }
+    ],
+    "description": "Top-16 fake images with smallest cosine distance to real set (highest memorization risk)"
+  },
+  "notes": "TorchMetrics MiFID/FID with InceptionV3 pool3 (2048 dims). uint8 input [0,255] resized to 299x299. MiFID = FID / M where M is memorization penalty from avg min cosine distance."
+}
+
