@@ -32,6 +32,8 @@ from GAN_Variant1.training.sched_optim import get_optimizer
 from GAN_Variant1.utils.seed_dist import set_seed
 from GAN_Variant1.utils.amp_utils import AMPContext
 from GAN_Variant1.utils.io_ckpt import EMA, save_checkpoint, load_checkpoint
+from GAN_Variant1.utils.loss_tracker import LossTracker
+from GAN_Variant1.utils.plot_losses import plot_training_losses
 
 
 def parse_args():
@@ -361,6 +363,10 @@ def main():
     Path(config['output']['checkpoint_dir']).mkdir(parents=True, exist_ok=True)
     Path(config['output']['log_dir']).mkdir(parents=True, exist_ok=True)
     
+    # Initialize loss tracker
+    loss_tracker = LossTracker(config['output']['log_dir'])
+    loss_tracker.start()
+    
     # Build dataloaders
     photos_loader, monet_loader, monet_dataset = build_dataloaders(config)
     print(f"Photos: {len(photos_loader.dataset)}, Monet: {len(monet_loader.dataset)}")
@@ -440,6 +446,9 @@ def main():
         for k, v in losses.items():
             loss_accumulator[k].append(v)
         
+        # Track losses for plotting
+        loss_tracker.log(step, losses['d_loss'], losses['g_loss'])
+        
         # Logging
         if step % config.get('log_every', 100) == 0 and step > 0:
             avg_losses = {k: np.mean(v) for k, v in loss_accumulator.items()}
@@ -474,6 +483,21 @@ def main():
         ema_G, amp_ctx.scaler, config=config
     )
     print(f"\nTraining complete. Final checkpoint: {ckpt_path}")
+    
+    # Close loss tracker and generate plot
+    loss_tracker.close()
+    
+    # Load history and create plot
+    history = loss_tracker.load_history()
+    if len(history['steps']) > 0:
+        plot_training_losses(
+            config['output']['log_dir'],
+            history['steps'],
+            history['d_losses'],
+            history['g_losses']
+        )
+    else:
+        print("No loss data to plot.")
     
     pbar.close()
 

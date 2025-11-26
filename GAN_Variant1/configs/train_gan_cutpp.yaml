@@ -3,15 +3,15 @@
 
 image_size: 256
 batch_size: 12
-epochs: 100
+epochs: 70
 max_steps: null
 
 # Paths
 data:
-  photos_dir: "../data/photo_jpg"
-  monet_dir: "../data/monet_jpg"
-  photos_tfrec: "../data/photo_tfrec"
-  monet_tfrec: "../data/monet_tfrec"
+  photos_dir: "data/photo_jpg"
+  monet_dir: "data/monet_jpg"
+  photos_tfrec: "data/photo_tfrec"
+  monet_tfrec: "data/monet_tfrec"
 
 output:
   checkpoint_dir: "GAN_Variant1/checkpoints"

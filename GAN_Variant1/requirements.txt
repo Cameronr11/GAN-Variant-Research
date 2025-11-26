@@ -21,6 +21,7 @@ scipy>=1.9.0
 # Config and utilities
 pyyaml>=6.0
 tqdm>=4.64.0
+matplotlib>=3.5.0  # For loss plotting
 
 # Optional: for TFRecord support
 # tensorflow>=2.10.0  # Uncomment if using TFRecord datasets
