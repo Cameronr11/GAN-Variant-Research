@@ -16,14 +16,98 @@ This repository contains a complete implementation of a **Contrastive Unpaired T
 
 ## Table of Contents
 
-1. [Architecture](#architecture)
-2. [Loss Functions](#loss-functions)
-3. [Training Process](#training-process)
-4. [Technical Decisions](#technical-decisions)
-5. [File Structure](#file-structure)
-6. [Usage](#usage)
-7. [Configuration](#configuration)
-8. [Implementation Details](#implementation-details)
+1. [Comparison: GAN_Variant1 vs Basic_GAN](#comparison-gan_variant1-vs-basic_gan)
+2. [Architecture](#architecture)
+3. [Loss Functions](#loss-functions)
+4. [Training Process](#training-process)
+5. [Technical Decisions](#technical-decisions)
+6. [File Structure](#file-structure)
+7. [Usage](#usage)
+8. [Configuration](#configuration)
+9. [Implementation Details](#implementation-details)
+
+---
+
+## Comparison: GAN_Variant1 vs Basic_GAN
+
+This section highlights the key differences between **GAN_Variant1** (CUT-based implementation) and **Basic_GAN** (CycleGAN-based baseline) in this project.
+
+### Core Framework Differences
+
+| Aspect | Basic_GAN (CycleGAN) | GAN_Variant1 (CUT) |
+|--------|----------------------|-------------------|
+| **Framework** | CycleGAN (bidirectional translation) | CUT (Contrastive Unpaired Translation) |
+| **Generators** | Two generators: `G_A2B` (photo→Monet) and `G_B2A` (Monet→photo) | Single generator: photo→Monet only |
+| **Discriminators** | Two discriminators: `D_A` (photo domain) and `D_B` (Monet domain) | Single discriminator (single-scale PatchGAN) |
+| **Translation Direction** | Bidirectional (both photo→Monet and Monet→photo) | Unidirectional (photo→Monet only) |
+
+### Loss Function Differences
+
+**Basic_GAN (CycleGAN) uses:**
+- **GAN Loss**: LSGAN (MSE) or BCE loss against target labels
+- **Cycle Consistency Loss**: `λ_cycle * ||G_B2A(G_A2B(photo)) - photo||₁` (ensures bidirectional reconstruction)
+- **Identity Loss**: `λ_identity * ||G_A2B(monet) - monet||₁` (preserves colors when input is already in target domain)
+
+**GAN_Variant1 (CUT) uses:**
+- **Hinge Adversarial Loss**: More stable than LSGAN/BCE, provides better gradients
+- **PatchNCE Contrastive Loss**: Core innovation - ensures corresponding patches in input/output are similar in feature space (extracts features from multiple generator layers)
+- **Identity Loss (Warmup)**: Only active during warmup phase (first 20k steps), then disabled
+- **R1 Regularization**: Gradient penalty applied lazily (every 16 steps) for discriminator stability
+
+### Training Methodology Differences
+
+| Aspect | Basic_GAN | GAN_Variant1 |
+|--------|-----------|--------------|
+| **Batch Size** | 1 (CycleGAN standard) | 12 (enables better contrastive learning) |
+| **Training Duration** | 200 epochs | 70 epochs |
+| **Learning Rate Schedule** | Linear decay after epoch 100 | Cosine annealing (smooth decay) |
+| **Data Augmentation** | Standard transforms (resize, crop, flip) | DiffAugment (differentiable: color, translation, cutout) |
+| **EMA (Exponential Moving Average)** | ❌ Not used | ✅ EMA with decay=0.999 for stable inference |
+| **Gradient Clipping** | ❌ Not used | ✅ Clipping (max_norm=10.0) for both G and D |
+| **R1 Regularization** | ❌ Not used | ✅ Lazy R1 (every 16 steps, γ=10.0) |
+
+### Key Architectural Advantages of GAN_Variant1
+
+1. **More Efficient Training**: 
+   - Single generator instead of two (lower memory, faster training)
+   - Can use larger batch sizes (12 vs 1) for better contrastive learning
+   - Fewer forward passes per training step
+
+2. **Better Content Preservation**:
+   - PatchNCE directly enforces feature-level correspondence between input and output patches
+   - Extracts features from multiple generator layers `[0, 4, 8, 12, 16]` at different scales
+   - More explicit content preservation compared to cycle consistency
+
+3. **Advanced Training Features**:
+   - **EMA**: Provides more stable generator weights for inference
+   - **DiffAugment**: Differentiable data augmentation that allows gradients to flow through
+   - **R1 Regularization**: Improves discriminator training stability
+   - **Gradient Clipping**: Prevents gradient explosion
+   - **NaN Detection**: Automatic error detection for training stability
+
+4. **Modern Loss Functions**:
+   - Hinge loss is more stable than LSGAN/BCE
+   - PatchNCE enables unpaired translation without requiring cycle consistency
+
+### When to Use Which?
+
+**Use Basic_GAN (CycleGAN) when:**
+- You need bidirectional translation (both photo→Monet and Monet→photo)
+- You want a well-established, widely-used baseline
+- You have limited GPU memory (batch size 1)
+- You prefer cycle consistency as the content preservation mechanism
+
+**Use GAN_Variant1 (CUT) when:**
+- You only need unidirectional translation (photo→Monet)
+- You want better content preservation through contrastive learning
+- You can use larger batch sizes for better contrastive learning
+- You want more advanced training features (EMA, R1, DiffAugment)
+- You need faster training (single generator, fewer forward passes)
+
+### Performance Notes
+
+- **Basic_GAN**: Standard CycleGAN baseline, achieves competitive results with proper training
+- **GAN_Variant1**: Baseline configuration achieves **103-105 MiFID** (as noted in config comments), demonstrating strong performance with the CUT framework
 
 ---
 
