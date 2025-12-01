@@ -103,7 +103,7 @@ class ResNetGenerator(nn.Module):
     ):
         super().__init__()
         
-        # Baseline: no attention or style dropout
+        
         
         # Initial convolution
         model = []
@@ -169,20 +169,20 @@ class ResNetGenerator(nn.Module):
         Returns:
             out: (B, 3, H, W) translated images in [-1, 1]
         """
-        # Initial conv
+        
         x = self.initial(x)
         
-        # Downsample
+        
         x = self.downsample(x)
         
-        # Residual blocks (baseline: no attention or style dropout)
+        
         for res_block in self.res_blocks:
             x = res_block(x)
         
-        # Upsample
+        
         x = self.upsample(x)
         
-        # Output
+        
         x = self.output(x)
         
         return x
@@ -203,13 +203,13 @@ class ResNetGenerator(nn.Module):
         feats = []
         layer_idx = 0
         
-        # Initial
+        
         x = self.initial(x)
         if layer_idx in layer_ids:
             feats.append(x)
         layer_idx += 1
         
-        # Downsample (count each downblock as one layer)
+        
         for module in self.downsample:
             x = module(x)
             if isinstance(module, nn.ReLU):
@@ -217,14 +217,14 @@ class ResNetGenerator(nn.Module):
                     feats.append(x)
                 layer_idx += 1
         
-        # Res blocks (baseline: no attention)
+        
         for res_block in self.res_blocks:
             x = res_block(x)
             if layer_idx in layer_ids:
                 feats.append(x)
             layer_idx += 1
         
-        # Upsample
+        
         for module in self.upsample:
             x = module(x)
             if isinstance(module, nn.ReLU):

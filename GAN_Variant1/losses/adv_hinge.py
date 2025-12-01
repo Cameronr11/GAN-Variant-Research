@@ -16,7 +16,7 @@ def discriminator_hinge_loss(real_preds, fake_preds):
     """
     loss = 0.0
     
-    # Handle both single and multiscale discriminators
+    
     if not isinstance(real_preds, list):
         real_preds = [real_preds]
         fake_preds = [fake_preds]
@@ -30,7 +30,7 @@ def discriminator_hinge_loss(real_preds, fake_preds):
         
         loss += (loss_real + loss_fake) * 0.5
     
-    # Average over scales
+    
     loss = loss / len(real_preds)
     
     return loss
@@ -48,7 +48,7 @@ def generator_hinge_loss(fake_preds):
     """
     loss = 0.0
     
-    # Handle both single and multiscale discriminators
+   
     if not isinstance(fake_preds, list):
         fake_preds = [fake_preds]
     

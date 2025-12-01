@@ -56,14 +56,14 @@ def override_config(config, overrides):
         key_path, value = override.split('=', 1)
         keys = key_path.split('.')
         
-        # Navigate to the right nested dict
+        
         current = config
         for key in keys[:-1]:
             if key not in current:
                 current[key] = {}
             current = current[key]
         
-        # Set the value (try to parse as float/int/bool)
+        
         try:
             if value.lower() == 'true':
                 value = True
@@ -128,7 +128,7 @@ def build_dataloaders(config):
     """Build training dataloaders."""
     data_cfg = config['data']
     
-    # Transforms
+    
     transform = get_train_transforms(config['image_size'])
     
     # Datasets
@@ -159,7 +159,7 @@ def build_dataloaders(config):
     return photos_loader, monet_loader, monet_dataset
 
 
-# Removed CLIP and repulsion helper functions - not part of baseline
+
 
 
 def r1_regularization(discriminator, real_images, amp_ctx):
@@ -179,7 +179,7 @@ def r1_regularization(discriminator, real_images, amp_ctx):
     with torch.amp.autocast('cuda', enabled=False):
         real_pred = discriminator(real_images.float())
         
-        # Handle multiscale
+        
         if isinstance(real_pred, list):
             real_pred = sum([pred.sum() for pred in real_pred])
         else:
@@ -220,16 +220,14 @@ def train_step(
     """Single training step."""
     loss_weights = config['loss_weights']
     
-    # Compute identity weight (linear annealing during warmup)
+    
     warmup_steps = config.get('warmup_steps', 20000)
     if step < warmup_steps:
         identity_weight = loss_weights['identity_warm'] + (loss_weights['identity_final'] - loss_weights['identity_warm']) * (step / warmup_steps)
     else:
         identity_weight = loss_weights['identity_final']
     
-    # ======================
-    # Train Discriminator
-    # ======================
+    
     opt_D.zero_grad()
     
     with amp_ctx.autocast():
@@ -244,18 +242,18 @@ def train_step(
             photos_aug = photos
             fake_aug = fake_photos_monet.detach()
         
-        # Discriminator predictions
+        
         real_pred = discriminator(photos_aug)
         fake_pred = discriminator(fake_aug)
         
         # Hinge loss
         d_loss = discriminator_hinge_loss(real_pred, fake_pred)
     
-    # Backward with gradient clipping
+    
     amp_ctx.scale_backward(d_loss)
     amp_ctx.step_optimizer(opt_D, max_grad_norm=config.get('grad_clip_d', 10.0))
     
-    # R1 regularization (lazy)
+    
     r1_loss = torch.tensor(0.0, device=device)
     if config['r1']['gamma'] > 0 and step % config['r1']['every'] == 0:
         opt_D.zero_grad()
@@ -264,16 +262,14 @@ def train_step(
         amp_ctx.scale_backward(r1_weighted)
         amp_ctx.step_optimizer(opt_D, max_grad_norm=config.get('grad_clip_d', 10.0))
     
-    # ======================
-    # Train Generator
-    # ======================
+   
     opt_G.zero_grad()
     
     with amp_ctx.autocast():
-        # Generate fake images
+        
         fake_photos_monet = generator(photos)
         
-        # Apply DiffAugment
+        
         if diffaugment is not None:
             fake_aug = diffaugment(fake_photos_monet)
         else:
@@ -307,7 +303,7 @@ def train_step(
             identity_weight * idt_loss
         )
     
-    # Backward with gradient clipping
+    
     amp_ctx.scale_backward(g_loss)
     amp_ctx.step_optimizer(opt_G, max_grad_norm=config.get('grad_clip_g', 10.0))
     
@@ -315,7 +311,7 @@ def train_step(
     if ema_G is not None:
         ema_G.update()
     
-    # Collect losses with NaN detection (baseline only)
+    
     losses = {
         'd_loss': d_loss.item(),
         'g_loss': g_loss.item(),
@@ -326,7 +322,7 @@ def train_step(
         'identity_weight': identity_weight
     }
     
-    # Check for NaN and raise error if found
+    
     if any(not torch.isfinite(torch.tensor(v)).item() for k, v in losses.items() if k != 'identity_weight'):
         print(f"\n⚠️  NaN detected at step {step}!")
         print(f"Losses: {losses}")
@@ -335,63 +331,63 @@ def train_step(
     return losses
 
 
-# Removed evaluate_metrics function - evaluation done separately in EVAL folder
 
 
-# Removed EarlyStoppingTracker - baseline trains for fixed number of steps
+
+
 
 
 def main():
     """Main training loop."""
     args = parse_args()
     
-    # Load config
+    
     with open(args.config, 'r') as f:
         config = yaml.safe_load(f)
     
-    # Override config
+    
     config = override_config(config, args.set)
     
-    # Set seed
+    
     set_seed(config.get('seed', 42))
     
-    # Device
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
-    # Create output directories
+    
     Path(config['output']['checkpoint_dir']).mkdir(parents=True, exist_ok=True)
     Path(config['output']['log_dir']).mkdir(parents=True, exist_ok=True)
     
-    # Initialize loss tracker
+    
     loss_tracker = LossTracker(config['output']['log_dir'])
     loss_tracker.start()
     
-    # Build dataloaders
+    
     photos_loader, monet_loader, monet_dataset = build_dataloaders(config)
     print(f"Photos: {len(photos_loader.dataset)}, Monet: {len(monet_loader.dataset)}")
     
-    # Build models
+    
     generator, discriminator = build_models(config, device)
     
-    # Optimizers
+    
     opt_G = get_optimizer(generator, config['optim']['G'])
     opt_D = get_optimizer(discriminator, config['optim']['D'])
     
-    # EMA
+    
     ema_G = EMA(generator, decay=config['ema']['decay'])
     
-    # AMP
+    
     amp_ctx = AMPContext(enabled=config.get('amp', True))
     
-    # DiffAugment
+    
     diffaugment = None
     if config['diffaugment'].get('enable', False):
         diffaugment = DiffAugment(config['diffaugment'].get('policy', ['color', 'translation', 'cutout']))
     
-    # Baseline: No palette, CLIP, repulsion, FID, or early stopping
     
-    # Resume from checkpoint
+    
+    
     start_step = 0
     if args.resume:
         checkpoint = load_checkpoint(
@@ -400,7 +396,7 @@ def main():
         start_step = checkpoint['step']
         print(f"Resumed from step {start_step}")
     
-    # Training loop
+    
     max_steps = config.get('max_steps', None)
     if max_steps is None:
         max_steps = config['epochs'] * len(photos_loader)
@@ -419,7 +415,7 @@ def main():
     loss_accumulator = defaultdict(list)
     
     while step < max_steps:
-        # Get batches
+        
         try:
             photos = next(photos_iter)
         except StopIteration:
@@ -446,10 +442,10 @@ def main():
         for k, v in losses.items():
             loss_accumulator[k].append(v)
         
-        # Track losses for plotting
+        
         loss_tracker.log(step, losses['d_loss'], losses['g_loss'])
         
-        # Logging
+        
         if step % config.get('log_every', 100) == 0 and step > 0:
             avg_losses = {k: np.mean(v) for k, v in loss_accumulator.items()}
             loss_str = " | ".join([f"{k}: {v:.4f}" for k, v in avg_losses.items()])
@@ -462,9 +458,9 @@ def main():
             
             loss_accumulator.clear()
         
-        # No inline evaluation - use external EVAL folder after training
         
-        # Save checkpoint
+        
+        
         if step % config['metrics']['save_checkpoint_every'] == 0 and step > 0:
             ckpt_path = Path(config['output']['checkpoint_dir']) / f'ckpt_step{step}.pt'
             save_checkpoint(
@@ -476,7 +472,7 @@ def main():
         step += 1
         pbar.update(1)
     
-    # Final checkpoint
+    
     ckpt_path = Path(config['output']['checkpoint_dir']) / f'ckpt_final.pt'
     save_checkpoint(
         str(ckpt_path), step, generator, discriminator, opt_G, opt_D,
@@ -484,7 +480,7 @@ def main():
     )
     print(f"\nTraining complete. Final checkpoint: {ckpt_path}")
     
-    # Close loss tracker and generate plot
+    
     loss_tracker.close()
     
     # Load history and create plot

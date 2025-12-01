@@ -52,49 +52,48 @@ class PatchNCELoss(nn.Module):
         """
         B, C, H, W = src_feat.shape
         
-        # Flatten spatial dimensions
+       
         src_feat = src_feat.view(B, C, -1).permute(0, 2, 1)  # (B, HW, C)
         tgt_feat = tgt_feat.view(B, C, -1).permute(0, 2, 1)  # (B, HW, C)
         
-        # Sample patches
+        
         num_patches = min(self.num_patches, H * W)
         
         # Random sampling
         patch_ids = torch.randint(0, H * W, (num_patches,), device=src_feat.device)
         
-        # Extract patches
+        
         src_patches = []
         tgt_patches = []
         
         for b in range(B):
-            src_patches.append(src_feat[b, patch_ids, :])  # (num_patches, C)
-            tgt_patches.append(tgt_feat[b, patch_ids, :])  # (num_patches, C)
+            src_patches.append(src_feat[b, patch_ids, :])  
+            tgt_patches.append(tgt_feat[b, patch_ids, :]) 
         
-        src_patches = torch.stack(src_patches, dim=0)  # (B, num_patches, C)
-        tgt_patches = torch.stack(tgt_patches, dim=0)  # (B, num_patches, C)
+        src_patches = torch.stack(src_patches, dim=0)  
+        tgt_patches = torch.stack(tgt_patches, dim=0)  
         
-        # Normalize with epsilon for numerical stability
+        
         src_patches = F.normalize(src_patches, dim=2, eps=1e-6)
         tgt_patches = F.normalize(tgt_patches, dim=2, eps=1e-6)
         
-        # Compute similarity matrix
-        # For each query (tgt_patch), compute similarity with all keys (src_patches)
+      
         loss = 0.0
         
         for b in range(B):
-            # (num_patches, C) x (C, num_patches) -> (num_patches, num_patches)
+            
             logits = torch.mm(tgt_patches[b], src_patches[b].t()) / self.temperature
             
-            # Clamp logits to prevent overflow in exp() (numerical stability)
+            
             logits = torch.clamp(logits, min=-50.0, max=50.0)
             
-            # Diagonal elements are positive pairs
+            
             labels = torch.arange(num_patches, device=logits.device)
             
             # Cross entropy loss
             batch_loss = self.cross_entropy(logits, labels)
             
-            # Safety check for NaN
+            
             if not torch.isfinite(batch_loss):
                 print(f"Warning: NaN in PatchNCE loss. Logit stats: min={logits.min().item():.2f}, max={logits.max().item():.2f}, mean={logits.mean().item():.2f}")
                 batch_loss = torch.tensor(0.0, device=batch_loss.device)
@@ -103,7 +102,7 @@ class PatchNCELoss(nn.Module):
         
         total_loss = loss / B
         
-        # Final NaN check
+        
         if not torch.isfinite(total_loss):
             print(f"Warning: Final PatchNCE loss is NaN. Returning 0.")
             return torch.tensor(0.0, device=total_loss.device, requires_grad=True)
@@ -139,10 +138,10 @@ def compute_patchnce_loss(
     with torch.no_grad():
         src_feats = generator.get_feature_layers(src_images, nce_layers)
     
-    # Detach to prevent gradients flowing back through encoder
+    
     src_feats = [feat.detach() for feat in src_feats]
     
-    # Target features (with gradients)
+    
     tgt_feats = generator.get_feature_layers(tgt_images, nce_layers)
     
     loss = nce_loss_fn(src_feats, tgt_feats)

@@ -1,5 +1,3 @@
-# STABLE BASELINE CONFIG - Proven to reach 103-105 MiFID
-# This is the EXACT vanilla CUT setup that worked before feature additions
 
 image_size: 256
 batch_size: 12
@@ -17,18 +15,18 @@ output:
   checkpoint_dir: "GAN_Variant1/checkpoints"
   log_dir: "GAN_Variant1/logs"
 
-# Optimizer (BASELINE - proven stable)
+
 optim:
   G:
     lr: 2.0e-4
-    betas: [0.5, 0.999]  # Standard GAN betas
+    betas: [0.5, 0.999]  
     weight_decay: 0.0
     scheduler:
       type: cosine
       lr_min: 5.0e-5
   D:
     lr: 2.0e-4
-    betas: [0.5, 0.999]  # Standard GAN betas
+    betas: [0.5, 0.999]  
     weight_decay: 0.0
     scheduler:
       type: cosine
@@ -38,20 +36,20 @@ optim:
 grad_clip_g: 10.0
 grad_clip_d: 10.0
 
-# Loss weights - BASELINE (simple, stable)
+
 loss_weights:
   adv: 1.0
   patchnce: 1.0
   identity_warm: 0.1
   identity_final: 0.0
-  palette: 0.0  # OFF in baseline
-  repulsion: 0.0  # OFF in baseline
-  featmatch: 0.0  # OFF in baseline
+  palette: 0.0  
+  repulsion: 0.0  
+  featmatch: 0.0 
 
-# Warmup
+
 warmup_steps: 20000
 
-# Generator - VANILLA ResNet-9 (NO attention, NO AdaIN)
+
 model:
   generator:
     base: "resnet9"
@@ -61,61 +59,61 @@ model:
     norm: "instance"
     activation: "relu"
     padding_type: "reflect"
-    use_attention: false  # OFF - baseline had none
-    use_channel_attn: false  # OFF - baseline had none
-    use_style_dropout: false  # OFF - baseline had none
+    use_attention: false  
+    use_channel_attn: false 
+    use_style_dropout: false  
   
   discriminator:
-    base: "patchgan"  # SINGLE-SCALE - baseline was not multiscale
-    num_scales: 1  # Single scale only
+    base: "patchgan"  
+    num_scales: 1 
     ndf: 64
     n_layers: 3
     norm: "none"
-    use_spectral_norm: false  # OFF - baseline didn't use it
+    use_spectral_norm: false 
     receptive_field: 70
 
-# PatchNCE settings (BASELINE)
+
 patchnce:
   num_patches: 256
-  temperature: 0.07  # Original baseline value
+  temperature: 0.07  
   nce_layers: [0, 4, 8, 12, 16]
   nce_includes_all_negatives_from_minibatch: false
 
-# DiffAugment (BASELINE - lightweight)
+
 diffaugment:
   enable: true
-  policy: ["color", "translation", "cutout"]  # Exactly as baseline
+  policy: ["color", "translation", "cutout"]  
 
-# R1 regularization (BASELINE)
+
 r1:
-  gamma: 10.0  # As per baseline
-  every: 16  # Lazy R1 - only every 16 steps
+  gamma: 10.0  
+  every: 16  
 
-# EMA (BASELINE)
+
 ema:
   decay: 0.999
   warmup_steps: 100
 
-# Evaluation
+
 eval:
   every_steps: 500
   num_samples: 10
 
-# Metrics (OFF for baseline - just basic logging)
+
 metrics:
   compute_fid: false
   compute_clip_distance: false
   eval_every: 500
   save_checkpoint_every: 2000
 
-# Early stopping (OFF for baseline)
+
 early_stop:
   enable: false
   patience: 5
   fid_plateau_threshold: 1.0
   dmin_drop_threshold: 0.01
 
-# Checkpointing
+
 checkpoint:
   every_steps: 2000
   keep_last_n: 5
@@ -124,14 +122,14 @@ checkpoint:
 io:
   num_workers: 8
   pin_memory: true
-  amp: true  # Mixed precision
+  amp: true  
 
-# Logging
+
 log:
   every_steps: 100
   verbose: true
 
-# CLIP features - OFF in baseline
+
 clip_features:
   enabled: false
   backbone: "ViT-B/32"
@@ -139,7 +137,7 @@ clip_features:
   margin_path: "GAN_Variant1/artifacts/faiss/distance_margin.json"
   build_on_first_run: false
 
-# Palette prior - OFF in baseline  
+  
 palette:
   enabled: false
 
@@ -148,7 +146,7 @@ palette_prior:
   use_ema: true
   ema_decay: 0.99
 
-# Repulsion - OFF in baseline
+
 repulsion:
   enabled: false
 
